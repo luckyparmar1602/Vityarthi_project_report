@@ -1,0 +1,122 @@
+import csv
+import os
+
+FILE_NAME = "employees.csv"
+FIELDS = ["emp_id", "name", "department", "salary"]
+
+
+def load_data():
+    """Read the CSV file into a dictionary {emp_id: {details}}."""
+    employees = {}
+    if os.path.exists(FILE_NAME):
+        with open(FILE_NAME, "r", newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                employees[row["emp_id"]] = row
+    return employees
+
+
+def save_data(employees):
+    """Write the dictionary back to the CSV file."""
+    with open(FILE_NAME, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=FIELDS)
+        writer.writeheader()
+        for emp in employees.values():
+            writer.writerow(emp)
+
+
+def add_employee(employees):
+    emp_id = input("Enter Employee ID: ").strip()
+    if emp_id in employees:
+        print("Employee ID already exists!")
+        return
+    name = input("Enter Name: ").strip()
+    dept = input("Enter Department: ").strip()
+    salary = input("Enter Salary: ").strip()
+    employees[emp_id] = {
+        "emp_id": emp_id,
+        "name": name,
+        "department": dept,
+        "salary": salary,
+    }
+    save_data(employees)
+    print("Employee added successfully.")
+
+
+def display_all(employees):
+    if not employees:
+        print("No employee records found.")
+        return
+    print("\n{:<10}{:<20}{:<15}{:<10}".format("ID", "Name", "Department", "Salary"))
+    print("-" * 55)
+    for emp in employees.values():
+        print("{:<10}{:<20}{:<15}{:<10}".format(
+            emp["emp_id"], emp["name"], emp["department"], emp["salary"]))
+
+
+def search_employee(employees):
+    emp_id = input("Enter Employee ID to search: ").strip()
+    emp = employees.get(emp_id)
+    if emp:
+        print("\nRecord Found:")
+        for key, value in emp.items():
+            print(f"{key.capitalize():<12}: {value}")
+    else:
+        print("Employee not found.")
+
+
+def update_employee(employees):
+    emp_id = input("Enter Employee ID to update: ").strip()
+    if emp_id not in employees:
+        print("Employee not found.")
+        return
+    print("Press Enter to keep the current value.")
+    emp = employees[emp_id]
+    emp["name"] = input(f"Name [{emp['name']}]: ").strip() or emp["name"]
+    emp["department"] = input(f"Department [{emp['department']}]: ").strip() or emp["department"]
+    emp["salary"] = input(f"Salary [{emp['salary']}]: ").strip() or emp["salary"]
+    save_data(employees)
+    print("Record updated successfully.")
+
+
+def delete_employee(employees):
+    emp_id = input("Enter Employee ID to delete: ").strip()
+    if emp_id in employees:
+        del employees[emp_id]
+        save_data(employees)
+        print("Record deleted successfully.")
+    else:
+        print("Employee not found.")
+
+
+def main():
+    employees = load_data()
+    while True:
+        print("\n===== EMPLOYEE MANAGEMENT SYSTEM =====")
+        print("1. Add Employee")
+        print("2. Display All Employees")
+        print("3. Search Employee")
+        print("4. Update Employee")
+        print("5. Delete Employee")
+        print("6. Exit")
+        choice = input("Enter your choice (1-6): ").strip()
+
+        if choice == "1":
+            add_employee(employees)
+        elif choice == "2":
+            display_all(employees)
+        elif choice == "3":
+            search_employee(employees)
+        elif choice == "4":
+            update_employee(employees)
+        elif choice == "5":
+            delete_employee(employees)
+        elif choice == "6":
+            print("Exiting program. Goodbye!")
+            break
+        else:
+            print("Invalid choice! Please enter 1-6.")
+
+
+if __name__ == "__main__":
+    main()
